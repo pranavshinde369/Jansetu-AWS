@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import boto3
@@ -11,6 +12,14 @@ from reportlab.lib.pagesizes import letter
 from PyPDF2 import PdfReader, PdfWriter
 
 app = FastAPI(title="JanSetu Saathi API", description="Multi-turn empathetic voice assistant for users")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Allows any frontend to connect
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize AWS Bedrock Client
 bedrock = boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
