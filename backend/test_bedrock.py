@@ -7,7 +7,7 @@ def test_claude_connection():
         bedrock = boto3.client(service_name='bedrock-runtime', region_name='us-east-1')
 
         # The exact Model ID from your AWS console
-        model_id = 'us.anthropic.claude-sonnet-4-6'
+        model_id = 'us.anthropic.claude-sonnet-4-6'  # Replace with your actual model ID if different
 
         # The message format for the Converse API
         messages = [

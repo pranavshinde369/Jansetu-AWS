@@ -1,0 +1,76 @@
+{
+  "schemes": [
+    {
+      "name": "Ayushman Bharat (PM-JAY)",
+      "domain": "Healthcare",
+      "keywords": ["cancer", "health", "hospital", "sick", "operation", "medical", "doctor", "illness", "bimari", "ilaaj"],
+      "description": "Provides free health insurance of up to ₹5 lakhs per family per year for secondary and tertiary care hospitalization. (Requires Aadhar and Ration Card at submission).",
+      "required_details": ["full_name", "age", "district", "village"],
+      "pdf_template": "ayushman_form.pdf",
+      "action_required": "Aapka form taiyar hai! Kripya is form ke saath apna original Aadhar Card aur Ration Card nearest Seva Kendra par le jaayein."
+    },
+    {
+      "name": "PM Kisan Samman Nidhi",
+      "domain": "Agriculture",
+      "keywords": ["user", "crop", "land", "agriculture", "kisan", "kheti", "money for farm", "seeds", "fertilizer"],
+      "description": "Income support of ₹6,000 per year given in 3 installments to all land-holding user families. (Requires Aadhar and Bank Passbook at submission).",
+      "required_details": ["full_name", "land_size_hectares", "village", "district"],
+      "pdf_template": "pmkisan_form.pdf",
+      "action_required": "Aapka form taiyar hai! Kripya is PDF form ke saath apna Aadhar Card aur Bank Passbook CSC center le jaayein."
+    },
+    {
+      "name": "Pradhan Mantri Awas Yojana (Gramin)",
+      "domain": "Housing",
+      "keywords": ["house", "home", "homeless", "roof", "kucha house", "ghar", "makan", "housing loan", "construct house"],
+      "description": "Financial assistance to construct a pucca house for people living in kucha houses or who are homeless.",
+      "required_details": ["full_name", "annual_income", "caste_category", "current_housing_status"],
+      "pdf_template": "pmay_gramin_form.pdf",
+      "action_required": "Aapka form taiyar hai! Kripya form ke saath apna Aadhar Card, Income Certificate aur Caste Certificate Seva Kendra le jaayein."
+    },
+    {
+      "name": "e-Shram Card",
+      "domain": "Labor/Social Welfare",
+      "keywords": ["labor", "worker", "daily wage", "construction", "mazdoor", "unorganized worker", "pension", "insurance"],
+      "description": "A national database for unorganized workers (construction, migrant, gig workers) providing accident insurance and social security benefits.",
+      "required_details": ["full_name", "occupation", "district", "mobile_number"],
+      "pdf_template": "eshram_form.pdf",
+      "action_required": "Aapka form taiyar hai! Kripya is form ke saath apna Aadhar Card aur Bank Passbook nearest CSC/Seva Kendra le jaayein."
+    },
+    {
+      "name": "Pre-Matric Scholarship Scheme",
+      "domain": "Education",
+      "keywords": ["student", "school", "study", "fees", "scholarship", "padhai", "minority", "sc", "st", "books"],
+      "description": "Financial aid for students from minority communities or SC/ST categories studying in class 1 to 10 to help with school fees.",
+      "required_details": ["student_name", "class_grade", "caste_category", "school_name"],
+      "pdf_template": "pre_matric_scholarship_form.pdf",
+      "action_required": "Aapka form taiyar hai! Kripya iske saath apna Aadhar Card, Caste Certificate aur Income Certificate school ya Seva Kendra mein jama karein."
+    },
+    {
+      "name": "Pradhan Mantri Mudra Yojana (Shishu)",
+      "domain": "Business/Loans",
+      "keywords": ["business", "loan", "shop", "start business", "dukan", "money for business", "vendor", "stall"],
+      "description": "Provides loans up to ₹50,000 for starting small businesses (like shops, stalls) with no collateral required.",
+      "required_details": ["full_name", "business_type", "loan_amount_required", "district"],
+      "pdf_template": "mudra_loan_form.pdf",
+      "action_required": "Aapka form taiyar hai! Bank jaane ke liye is form ke saath apna Aadhar Card aur PAN Card zaroor le jaayein."
+    },
+    {
+      "name": "Sukanya Samriddhi Yojana",
+      "domain": "Women/Child",
+      "keywords": ["daughter", "girl child", "marriage", "future", "beti", "saving", "education for girl"],
+      "description": "A small deposit scheme for the girl child to save for her future education and marriage with high interest rates.",
+      "required_details": ["girl_child_name", "girl_age", "parent_name", "deposit_amount"],
+      "pdf_template": "sukanya_samriddhi_form.pdf",
+      "action_required": "Aapka form taiyar hai! Kripya is form ke saath bacchi ka Birth Certificate aur mata/pita ka Aadhar Card nearest Post Office ya Bank le jaayein."
+    },
+    {
+      "name": "Pradhan Mantri Fasal Bima Yojana",
+      "domain": "Agriculture",
+      "keywords": ["crop loss", "rain", "drought", "flood", "crop insurance", "fasal kharab", "nuksan"],
+      "description": "Crop insurance scheme that provides financial support to users suffering crop loss/damage arising out of unforeseen events.",
+      "required_details": ["user_name", "crop_name", "cause_of_loss", "date_of_loss", "village"],
+      "pdf_template": "fasal_bima_form.pdf",
+      "action_required": "Aapka form taiyar hai! Kripya is form ke saath Aadhar Card, Bank Passbook aur zameen ke kagaz (7/12 extract) Seva Kendra le jaayein."
+    }
+  ]
+}
