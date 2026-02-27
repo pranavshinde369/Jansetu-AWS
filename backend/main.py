@@ -266,3 +266,83 @@ async def create_matka_budget(request: FinanceRequest):
     except Exception as e:
         print(f"Error calling Bedrock for Matka: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate financial plan.")
+# ==========================================
+# --- MODULE 2: CURATED SHORTS & QUIZ ---
+# ==========================================
+
+class EducationRequest(BaseModel):
+    occupation: str 
+    language: str = "Hinglish"
+
+# You will replace these dummy links with your actual YouTube Shorts URLs!
+CURATED_SHORTS_DB = """
+1. Topic: "Mudra Loan - Sahi tareeka loan lene ka" | URL: "https://youtube.com/shorts/5wUyzr_hVC4?si=nUByhlT-kRSA1W6c"
+2. Topic: "Fake Loan Apps se saavdhan (Fraud Alert)" | URL: "https://youtube.com/shorts/qwxk247nm1I?si=uRfjM--AOjgQssZ2"
+3. Topic: "Bhavishya ke liye bachat (Savings Tips)" | URL: "https://youtube.com/shorts/1gCcNR7IX9c?si=nMoASeP26-ILcuOm"
+4. Topic: "PM Fasal Bima - Kheti ka insurance" | URL: "https://youtube.com/shorts/Dxpt7D7ECB8?si=ph7Me49eV1o3kXvL"
+5. Topic: "e-Shram Card ke fayde (For unorganized workers)" | URL: "https://youtube.com/shorts/bGkt1FZI5KY?si=PUqImkDTnzdOHEe1"
+"""
+
+EDUCATION_SYSTEM_PROMPT = f"""
+You are 'Aarthi Mitra', an encouraging educational guide for rural and unorganized sector workers in India.
+Your goal is to empower them by providing curated educational Shorts and testing their knowledge.
+
+HERE IS YOUR ONLY ALLOWED VIDEO DATABASE:
+{CURATED_SHORTS_DB}
+
+INSTRUCTIONS:
+1. Look at the user's 'occupation'.
+2. Select EXACTLY 1 or 2 videos from the Database above that are most relevant to them. YOU MUST USE THE EXACT URL PROVIDED IN THE DATABASE. Do not make up links.
+3. Create a short 2-question multiple-choice quiz based on the topic of the video(s) you selected to test their practical knowledge.
+4. Speak in clear, supportive Hinglish.
+
+You MUST return ONLY a valid JSON object in this exact format:
+{{
+    "intro_message": "Empathetic Hinglish greeting.",
+    "videos": [
+        {{
+            "title": "Title from database",
+            "youtube_url": "Exact URL from database",
+            "reason": "Why they should watch this (in Hinglish)"
+        }}
+    ],
+    "quiz": [
+        {{
+            "question": "Practical multiple-choice question in Hinglish",
+            "options": ["Option A", "Option B", "Option C", "Option D"],
+            "correct_answer": "The exact string of the correct option",
+            "explanation": "Why this is the correct answer (in Hinglish)"
+        }}
+    ]
+}}
+"""
+
+@app.post("/api/education/learn")
+async def generate_education_content(request: EducationRequest):
+    try:
+        user_prompt = f"Occupation: {request.occupation}, Language: {request.language}"
+        
+        response = bedrock.converse(
+            modelId=MODEL_ID,
+            messages=[{"role": "user", "content": [{"text": user_prompt}]}],
+            system=[{"text": EDUCATION_SYSTEM_PROMPT}],
+            inferenceConfig={"maxTokens": 1000, "temperature": 0.3} # Low temperature so it doesn't mess up URLs
+        )
+
+        raw_reply = response['output']['message']['content'][0]['text']
+        print(f"\n--- RAW EDUCATION RESPONSE ---\n{raw_reply}\n-----------------------\n")
+        
+        start_idx = raw_reply.find('{')
+        end_idx = raw_reply.rfind('}')
+        
+        if start_idx != -1 and end_idx != -1:
+            clean_json_str = raw_reply[start_idx:end_idx+1]
+            json_reply = json.loads(clean_json_str)
+        else:
+            json_reply = json.loads(raw_reply)
+            
+        return json_reply
+
+    except Exception as e:
+        print(f"Error calling Bedrock for Education: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate educational content.")
