@@ -61,7 +61,7 @@ const ShortsModule = () => {
     const fetchShorts = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/education/learn", {
+        const res = await fetch("http://100.55.54.237:8000/api/education/learn", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ occupation: "user" }),
