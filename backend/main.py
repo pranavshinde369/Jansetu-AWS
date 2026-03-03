@@ -10,6 +10,7 @@ from io import BytesIO
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from PyPDF2 import PdfReader, PdfWriter
+from gtts import gTTS
 
 app = FastAPI(title="JanSetu Saathi API", description="Multi-turn empathetic voice assistant for users")
 
@@ -54,6 +55,14 @@ def load_scheme_database():
 # Load the DB
 SCHEME_DB_STRING, SCHEMES_LIST = load_scheme_database()
 
+# Base directories for generated assets
+BASE_DIR = os.path.dirname(__file__)
+GENERATED_PDF_DIR = os.path.join(BASE_DIR, "generated_pdfs")
+AUDIO_DIR = os.path.join(BASE_DIR, "audio")
+
+os.makedirs(GENERATED_PDF_DIR, exist_ok=True)
+os.makedirs(AUDIO_DIR, exist_ok=True)
+
 # --- 2. DATA MODELS ---
 class ChatMessage(BaseModel):
     role: str
@@ -77,8 +86,8 @@ def generate_filled_pdf(scheme_name: str, extracted_details: dict):
                 action_text = scheme.get('action_required', action_text)
                 break
                 
-        template_path = os.path.join(os.path.dirname(__file__), 'pdf_templates', template_name)
-        output_path = os.path.join(os.path.dirname(__file__), 'generated_pdfs', f"filled_{template_name}")
+        template_path = os.path.join(BASE_DIR, "pdf_templates", template_name)
+        output_path = os.path.join(GENERATED_PDF_DIR, f"filled_{template_name}")
 
         if not os.path.exists(template_path):
             print(f"⚠️ Blank template {template_name} not found! Please place a blank PDF in the folder.")
@@ -137,6 +146,26 @@ def generate_filled_pdf(scheme_name: str, extracted_details: dict):
         print(f"❌ Error generating PDF: {e}")
         return None
 
+
+def generate_tts_audio(text: str) -> str | None:
+    """
+    Generate an MP3 file from the given text using gTTS.
+    Returns the absolute file path, or None on failure.
+    """
+    if not text.strip():
+        return None
+    try:
+        # Use a simple hash to avoid extremely long filenames
+        filename = f"reply_{abs(hash(text))}.mp3"
+        output_path = os.path.join(AUDIO_DIR, filename)
+        tts = gTTS(text=text, lang="hi")
+        tts.save(output_path)
+        print(f"✅ Audio generated at: {output_path}")
+        return output_path
+    except Exception as e:
+        print(f"❌ Error generating audio: {e}")
+        return None
+
 # --- 4. THE SYSTEM PROMPT ---
 SAATHI_SYSTEM_PROMPT = f"""
 You are 'Aarthi Mitra', an empathetic, WhatsApp-based AI assistant for rural users on the JanSetu platform.
@@ -165,8 +194,32 @@ You MUST respond ONLY with a valid JSON object in this exact format:
 @app.post("/api/saathi/chat")
 async def process_chat(request: ChatRequest):
     try:
-        formatted_messages = [{"role": msg.role, "content": [{"text": msg.content}]} for msg in request.history]
-        formatted_messages.append({"role": "user", "content": [{"text": request.new_message}]})
+        # Build a Bedrock-compatible message history.
+        # 1. Skip any leading assistant/model messages so the conversation always starts with a user.
+        # 2. Normalize any AI messages to role "assistant".
+        formatted_messages: List[Dict[str, Any]] = []
+
+        for msg in request.history:
+            normalized_role = msg.role.lower()
+
+            # If we haven't added anything yet and the first item is assistant/model, skip it.
+            if not formatted_messages and normalized_role in {"assistant", "model"}:
+                continue
+
+            # Map any AI roles to "assistant" explicitly.
+            if normalized_role in {"assistant", "model"}:
+                bedrock_role = "assistant"
+            else:
+                bedrock_role = "user"
+
+            formatted_messages.append(
+                {"role": bedrock_role, "content": [{"text": msg.content}]}
+            )
+
+        # Always append the latest user message as the final turn.
+        formatted_messages.append(
+            {"role": "user", "content": [{"text": request.new_message}]}
+        )
 
         response = bedrock.converse(
             modelId=MODEL_ID,
@@ -182,12 +235,29 @@ async def process_chat(request: ChatRequest):
         
         start_idx = raw_reply.find('{')
         end_idx = raw_reply.rfind('}')
-        
+
         if start_idx != -1 and end_idx != -1:
-            clean_json_str = raw_reply[start_idx:end_idx+1]
-            json_reply = json.loads(clean_json_str)
+            try:
+                clean_json_str = raw_reply[start_idx:end_idx+1]
+                json_reply = json.loads(clean_json_str)
+            except json.JSONDecodeError:
+                # Fallback if the extracted string is still invalid JSON
+                json_reply = {
+                    "ai_reply": raw_reply.strip(),
+                    "matched_scheme": None,
+                    "extracted_details": {},
+                    "missing_details": [],
+                    "ready_for_pdf": False
+                }
         else:
-            json_reply = json.loads(raw_reply)
+            # Safely package the plain text into our expected dictionary format
+            json_reply = {
+                "ai_reply": raw_reply.strip(),
+                "matched_scheme": None,
+                "extracted_details": {},
+                "missing_details": [],
+                "ready_for_pdf": False
+            }
         
         # --- THE MAGIC HANDOFF ---
         if json_reply.get("ready_for_pdf") == True:
@@ -199,11 +269,39 @@ async def process_chat(request: ChatRequest):
             if pdf_path:
                 json_reply["pdf_download_url"] = f"/api/download_pdf?filename={os.path.basename(pdf_path)}"
 
+        # --- AUDIO GENERATION FOR EVERY AI REPLY ---
+        ai_text = json_reply.get("ai_reply")
+        audio_path = generate_tts_audio(ai_text) if ai_text else None
+        if audio_path:
+            json_reply["audio_url"] = f"/api/audio/{os.path.basename(audio_path)}"
+
         return json_reply
 
     except Exception as e:
         print(f"Error calling Bedrock: {e}")
         raise HTTPException(status_code=500, detail="Failed to process chat.")
+
+
+@app.get("/api/download_pdf")
+async def download_pdf(filename: str):
+    """
+    Serve generated PDF files for download.
+    """
+    file_path = os.path.join(GENERATED_PDF_DIR, filename)
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="PDF not found")
+    return FileResponse(file_path, media_type="application/pdf", filename=filename)
+
+
+@app.get("/api/audio/{filename}")
+async def get_audio(filename: str):
+    """
+    Serve generated MP3 voice notes.
+    """
+    file_path = os.path.join(AUDIO_DIR, filename)
+    if not os.path.isfile(file_path):
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    return FileResponse(file_path, media_type="audio/mpeg", filename=filename)
 
 
 # ==========================================

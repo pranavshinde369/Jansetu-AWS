@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 30 21% 89%;
+    --foreground: 0 0% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 15%;
+
+    --primary: 168 84% 19%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 168 40% 31%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 30 10% 94%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 168 60% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 168 84% 19%;
+
+    --radius: 0.75rem;
+
+    /* Custom JanSetu tokens */
+    --wa-green: 168 84% 19%;
+    --wa-teal: 168 40% 31%;
+    --wa-light-green: 100 72% 87%;
+    --wa-chat-bg: 30 21% 89%;
+    --wa-bubble-user: 100 72% 87%;
+    --wa-bubble-ai: 0 0% 100%;
+    --wa-header: 168 84% 19%;
+
+    /* Matka pot colors */
+    --pot-ghar: 15 65% 50%;
+    --pot-kaam: 35 80% 55%;
+    --pot-bhavishya: 168 50% 40%;
+    --pot-emergency: 0 60% 50%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Noto Sans', sans-serif;
+  }
+}
+
+/* Chat background pattern */
+.chat-bg-pattern {
+  background-color: hsl(var(--wa-chat-bg));
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c8c3bb' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Pulse animation for mic */
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsla(0, 72%, 51%, 0.4); }
+  50% { box-shadow: 0 0 0 12px hsla(0, 72%, 51%, 0); }
+}
+
+.mic-pulsing {
+  animation: mic-pulse 1.2s ease-in-out infinite;
+}
+
+/* Count up animation */
+@keyframes count-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.count-animate {
+  animation: count-fade-in 0.6s ease-out forwards;
+}
+
+/* Scroll snap for shorts */
+.shorts-scroll {
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shorts-scroll > div {
+  scroll-snap-align: start;
+}
+
+/* Bottom sheet slide up */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}
