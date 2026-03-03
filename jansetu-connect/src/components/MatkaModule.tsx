@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Loader2, ChevronDown, Target, Lightbulb } from "lucide-react";
+import { Loader2, ChevronDown, Target, Lightbulb, Users, Wallet, RefreshCw, CalendarDays } from "lucide-react";
 
 interface PotData {
   ghar: number;
@@ -38,21 +38,45 @@ const AnimatedNumber = ({ target, duration = 1500 }: { target: number; duration?
   return <span>₹{value.toLocaleString("en-IN")}</span>;
 };
 
-const Pot = ({ label, emoji, amount, colorClass }: { label: string; emoji: string; amount: number; colorClass: string }) => (
-  <div className="flex flex-col items-center gap-1.5">
-    <div className={`w-20 h-20 rounded-full ${colorClass} flex items-center justify-center shadow-lg count-animate`}>
-      <span className="text-2xl">{emoji}</span>
+const Pot = ({
+  label,
+  emoji,
+  amount,
+  colorClass,
+  isActive,
+}: {
+  label: string;
+  emoji: string;
+  amount: number;
+  colorClass: string;
+  isActive?: boolean;
+}) => (
+  <div className="flex flex-col items-center gap-2 select-none">
+    <div
+      className={[
+        "relative w-[92px] h-[92px] rounded-3xl flex items-center justify-center shadow-lg count-animate",
+        "transition-transform duration-200 ease-out",
+        "before:content-[''] before:absolute before:inset-0 before:rounded-3xl before:opacity-40 before:pointer-events-none",
+        "before:bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.9),rgba(255,255,255,0)_55%)]",
+        isActive ? "scale-[1.03] ring-2 ring-secondary ring-offset-2" : "hover:scale-[1.02]",
+        colorClass,
+      ].join(" ")}
+    >
+      <span className="text-3xl drop-shadow-sm">{emoji}</span>
+      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-card/95 border border-border shadow-sm">
+        {label}
+      </span>
     </div>
-    <span className="text-xs font-bold text-foreground">{label}</span>
-    <span className="text-sm font-bold text-foreground">
+    <div className="text-[13px] font-extrabold text-foreground tracking-tight">
       <AnimatedNumber target={amount} />
-    </span>
+    </div>
   </div>
 );
 
 const MatkaModule = () => {
   const [income, setIncome] = useState(10000);
   const [source, setSource] = useState("");
+  const [familySize, setFamilySize] = useState(4);
   const [goal, setGoal] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<MatkaResult | null>(null);
@@ -69,7 +93,7 @@ const MatkaModule = () => {
         body: JSON.stringify({
           monthly_income: income,
           primary_source: source,
-          family_size: 4,
+          family_size: familySize,
           financial_goal: goal || "General savings",
         }),
       });
@@ -192,6 +216,40 @@ const MatkaModule = () => {
         <ChevronDown size={16} className="absolute right-3 top-8 text-muted-foreground pointer-events-none" />
       </div>
 
+      {/* Family size */}
+      <div className="mb-4">
+        <label className="text-xs font-medium text-muted-foreground mb-1 block">Family Size</label>
+        <div className="flex items-center gap-2">
+          <div className="flex-1 relative">
+            <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={familySize}
+              onChange={(e) => setFamilySize(Math.min(20, Math.max(1, Number(e.target.value) || 1)))}
+              className="w-full bg-muted rounded-lg pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="px-3 py-2 rounded-lg bg-muted border border-border text-xs font-semibold hover:border-secondary transition-colors active:scale-[0.98]"
+              onClick={() => setFamilySize((v) => Math.max(1, v - 1))}
+            >
+              -
+            </button>
+            <button
+              type="button"
+              className="px-3 py-2 rounded-lg bg-muted border border-border text-xs font-semibold hover:border-secondary transition-colors active:scale-[0.98]"
+              onClick={() => setFamilySize((v) => Math.min(20, v + 1))}
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Goal input */}
       <div className="mb-4">
         <label className="text-xs font-medium text-muted-foreground mb-1 block">Financial Goal</label>
@@ -208,7 +266,7 @@ const MatkaModule = () => {
       <button
         onClick={calculate}
         disabled={!source || isLoading}
-        className="w-full bg-secondary text-secondary-foreground py-3 rounded-lg font-semibold text-sm disabled:opacity-50 hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+        className="w-full bg-secondary text-secondary-foreground py-3 rounded-lg font-semibold text-sm disabled:opacity-50 hover:opacity-90 transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
       >
         {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Target size={18} />}
         {isLoading ? "Calculating..." : "Calculate Plan"}
@@ -217,54 +275,76 @@ const MatkaModule = () => {
       {/* Results */}
       {result && (
         <div className="mt-6 space-y-5 count-animate">
+          {/* Plan summary */}
+          <div className="bg-muted rounded-2xl p-4 border border-border">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[11px] text-muted-foreground">Plan Summary</p>
+                <p className="text-sm font-bold text-foreground truncate">
+                  {source} • परिवार {familySize} • {goal ? `Goal: ${goal}` : "Goal: General savings"}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="px-2.5 py-1 rounded-full bg-card border border-border text-xs font-extrabold text-foreground flex items-center gap-1.5">
+                  <Wallet size={14} className="text-secondary" />
+                  ₹{income.toLocaleString("en-IN")}
+                </div>
+                <button
+                  type="button"
+                  onClick={calculate}
+                  className="p-2 rounded-xl bg-card border border-border hover:border-secondary transition-colors active:scale-[0.98]"
+                  aria-label="Recalculate"
+                >
+                  <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Pots grid */}
           <div className="grid grid-cols-2 gap-5 place-items-center">
-            <button type="button" className="focus:outline-none" onClick={() => setActivePot("ghar")}>
+            <button type="button" className="focus:outline-none active:scale-[0.99] transition-transform" onClick={() => setActivePot("ghar")}>
               <Pot
-                label="घर (Home)"
+                label="घर"
                 emoji="🏠"
                 amount={result.pots.ghar}
-                colorClass={`bg-pot-ghar ${
-                  activePot === "ghar" ? "ring-2 ring-secondary ring-offset-2" : ""
-                }`}
+                colorClass="bg-pot-ghar"
+                isActive={activePot === "ghar"}
               />
             </button>
-            <button type="button" className="focus:outline-none" onClick={() => setActivePot("kaam")}>
+            <button type="button" className="focus:outline-none active:scale-[0.99] transition-transform" onClick={() => setActivePot("kaam")}>
               <Pot
-                label="काम (Work)"
+                label="काम"
                 emoji="🔧"
                 amount={result.pots.kaam}
-                colorClass={`bg-pot-kaam ${
-                  activePot === "kaam" ? "ring-2 ring-secondary ring-offset-2" : ""
-                }`}
+                colorClass="bg-pot-kaam"
+                isActive={activePot === "kaam"}
               />
             </button>
             <button
               type="button"
-              className="focus:outline-none"
+              className="focus:outline-none active:scale-[0.99] transition-transform"
               onClick={() => setActivePot("bhavishya")}
             >
               <Pot
-                label="भविष्य (Future)"
+                label="भविष्य"
                 emoji="🌱"
                 amount={result.pots.bhavishya}
-                colorClass={`bg-pot-bhavishya ${
-                  activePot === "bhavishya" ? "ring-2 ring-secondary ring-offset-2" : ""
-                }`}
+                colorClass="bg-pot-bhavishya"
+                isActive={activePot === "bhavishya"}
               />
             </button>
             <button
               type="button"
-              className="focus:outline-none"
+              className="focus:outline-none active:scale-[0.99] transition-transform"
               onClick={() => setActivePot("aapatkalin")}
             >
               <Pot
-                label="आपातकालीन (Emergency)"
+                label="आपातकालीन"
                 emoji="🛡️"
                 amount={result.pots.aapatkalin}
-                colorClass={`bg-pot-emergency ${
-                  activePot === "aapatkalin" ? "ring-2 ring-secondary ring-offset-2" : ""
-                }`}
+                colorClass="bg-pot-emergency"
+                isActive={activePot === "aapatkalin"}
               />
             </button>
           </div>
@@ -281,19 +361,31 @@ const MatkaModule = () => {
               return (
                 <>
                   <div className="w-full h-2 rounded-full bg-muted overflow-hidden flex">
-                    <div
+                    <button
+                      type="button"
+                      aria-label="Select Ghar pot"
+                      onClick={() => setActivePot("ghar")}
                       className="h-full bg-pot-ghar"
                       style={{ width: `${pct(result.pots.ghar)}%` }}
                     />
-                    <div
+                    <button
+                      type="button"
+                      aria-label="Select Kaam pot"
+                      onClick={() => setActivePot("kaam")}
                       className="h-full bg-pot-kaam"
                       style={{ width: `${pct(result.pots.kaam)}%` }}
                     />
-                    <div
+                    <button
+                      type="button"
+                      aria-label="Select Bhavishya pot"
+                      onClick={() => setActivePot("bhavishya")}
                       className="h-full bg-pot-bhavishya"
                       style={{ width: `${pct(result.pots.bhavishya)}%` }}
                     />
-                    <div
+                    <button
+                      type="button"
+                      aria-label="Select Aapatkalin pot"
+                      onClick={() => setActivePot("aapatkalin")}
                       className="h-full bg-pot-emergency"
                       style={{ width: `${pct(result.pots.aapatkalin)}%` }}
                     />
@@ -319,7 +411,7 @@ const MatkaModule = () => {
                     देखें कि आपका <span className="font-semibold">भविष्य मटका</span> कितने समय में लक्ष्य तक पहुँचा सकता है।
                   </p>
                 </div>
-                <span className="text-lg">📅</span>
+                <CalendarDays size={18} className="text-secondary" />
               </div>
               <div className="space-y-2">
                 <label className="text-[11px] font-medium text-muted-foreground block">
@@ -343,23 +435,37 @@ const MatkaModule = () => {
                   const months = Math.ceil(savingsTarget / perMonth);
                   const years = Math.floor(months / 12);
                   const remMonths = months % 12;
+                  const progressPerMonth = Math.min(100, Math.round((perMonth / savingsTarget) * 100));
                   return (
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      अगर आप <span className="font-semibold">भविष्य मटके</span> में हर महीने{" "}
-                      <span className="font-semibold">
-                        ₹{perMonth.toLocaleString("en-IN")}
-                      </span>{" "}
-                      रखते हैं, तो{" "}
-                      <span className="font-semibold">
-                        ₹{savingsTarget.toLocaleString("en-IN")}
-                      </span>{" "}
-                      जमा करने में लगभग{" "}
-                      <span className="font-semibold">
-                        {years > 0 && `${years} साल `}
-                        {remMonths} महीने
-                      </span>{" "}
-                      लगेंगे।
-                    </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-muted-foreground">
+                          Per month: <span className="font-semibold text-foreground">₹{perMonth.toLocaleString("en-IN")}</span>
+                        </span>
+                        <span className="text-muted-foreground">
+                          ETA:{" "}
+                          <span className="font-semibold text-foreground">
+                            {years > 0 && `${years}y `}
+                            {remMonths}m
+                          </span>
+                        </span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                        <div className="h-full bg-secondary" style={{ width: `${progressPerMonth}%` }} />
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        अगर आप <span className="font-semibold">भविष्य मटके</span> में हर महीने{" "}
+                        <span className="font-semibold">₹{perMonth.toLocaleString("en-IN")}</span>{" "}
+                        रखते हैं, तो{" "}
+                        <span className="font-semibold">₹{savingsTarget.toLocaleString("en-IN")}</span>{" "}
+                        जमा करने में लगभग{" "}
+                        <span className="font-semibold">
+                          {years > 0 && `${years} साल `}
+                          {remMonths} महीने
+                        </span>{" "}
+                        लगेंगे।
+                      </p>
+                    </div>
                   );
                 })()}
               </div>
