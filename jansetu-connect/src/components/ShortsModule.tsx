@@ -61,7 +61,7 @@ const ShortsModule = () => {
     const fetchShorts = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch("http://100.55.54.237:8000/api/education/learn", {
+        const res = await fetch("https://b3o2l0l3x8.execute-api.us-east-1.amazonaws.com/api/education/learn", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ occupation: "user" }),

@@ -87,7 +87,7 @@ const MatkaModule = () => {
     if (!source) return;
     setIsLoading(true);
     try {
-      const res = await fetch("http://100.55.54.237:8000/api/finance/matka", {
+      const res = await fetch("https://b3o2l0l3x8.execute-api.us-east-1.amazonaws.com/api/finance/matka", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

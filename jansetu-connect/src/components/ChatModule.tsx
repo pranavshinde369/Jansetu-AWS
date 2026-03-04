@@ -54,7 +54,7 @@ const ChatModule = ({ isMuted }: ChatModuleProps) => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://100.55.54.237:8000/api/saathi/chat", {
+      const res = await fetch("https://b3o2l0l3x8.execute-api.us-east-1.amazonaws.com/api/saathi/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -126,7 +126,7 @@ const ChatModule = ({ isMuted }: ChatModuleProps) => {
 
     const resolvedUrl = lastWithAudio.audioUrl.startsWith("http")
       ? lastWithAudio.audioUrl
-      : `http://100.55.54.237:8000${lastWithAudio.audioUrl}`;
+      : `https://b3o2l0l3x8.execute-api.us-east-1.amazonaws.com${lastWithAudio.audioUrl}`;
 
     if (lastPlayedAudioRef.current === resolvedUrl) return;
     lastPlayedAudioRef.current = resolvedUrl;
@@ -160,7 +160,7 @@ const ChatModule = ({ isMuted }: ChatModuleProps) => {
                 <audio
                   controls
                   className="mt-2 w-full"
-                  src={msg.audioUrl.startsWith("http") ? msg.audioUrl : `http://100.55.54.237:8000${msg.audioUrl}`}
+                  src={msg.audioUrl.startsWith("http") ? msg.audioUrl : `https://b3o2l0l3x8.execute-api.us-east-1.amazonaws.com${msg.audioUrl}`}
                 />
               )}
               {msg.pdfUrl && (
