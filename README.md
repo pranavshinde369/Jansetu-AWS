@@ -103,15 +103,9 @@ Current barriers include:
 
 ## 📸 Screenshots
 
-*(Create an `assets` folder in the root and add the following screenshots)*
-
-| Home Dashboard | Voice Interaction (Saathi) |
-|:---:|:---:|
-| ![Home Screen](assets/home.png) <br> *Suggest: Capture the main landing page with the microphone prominently displayed* | ![Chat Interface](assets/chat.png) <br> *Suggest: Capture the multi-turn conversational interface* |
-
-| Auto-Generated PDF | Financial Matka Planner |
-|:---:|:---:|
-| ![Filled PDF](assets/pdf_output.png) <br> *Suggest: Show a side-by-side of a blank form vs. the generated filled PDF* | ![Financial Education](assets/matka_planner.png) <br> *Suggest: Capture the traditional Matka budgeting UI* |
+| Voice Interaction (Saathi) | Educational Shorts (Pathshala) | Financial Matka Planner |
+|:---:|:---:|:---:|
+| ![Chat Interface](assets/chat.png) | ![Shorts Interface](assets/shorts.png) | ![Matka Planner](assets/matka.png) |
 
 ---
 
